@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "POST contact message",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Тест Имя",
+        "contact": "test@mail.ru",
+        "message": "Тестовое сообщение для проверки"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"success": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST empty fields returns 400",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "",
+        "contact": "",
+        "message": ""
+      },
+      "expectedStatus": 400,
+      "expectedBody": {"error": "Заполните все поля формы"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

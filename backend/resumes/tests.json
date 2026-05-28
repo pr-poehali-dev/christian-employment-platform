@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "GET resumes list",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"resumes": [], "total": 0},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST create resume",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "first_name": "Иван",
+        "last_name": "Тестов",
+        "title": "Тест должность",
+        "city": "Москва",
+        "specialty": "IT",
+        "contact_email": "test@mail.ru",
+        "experience_years": 3,
+        "about": "Краткое описание"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {"success": true},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

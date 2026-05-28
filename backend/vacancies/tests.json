@@ -1,0 +1,41 @@
+{
+  "tests": [
+    {
+      "name": "GET vacancies list",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"vacancies": [], "total": 0},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST create vacancy",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "title": "Тест вакансия",
+        "organization": "Тест организация",
+        "city": "Москва",
+        "specialty": "IT",
+        "employment_type": "Полная занятость",
+        "contact_email": "test@test.ru"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {"success": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST respond missing fields returns 400",
+      "method": "POST",
+      "path": "/respond",
+      "body": {
+        "vacancy_id": 999,
+        "name": "",
+        "contact": ""
+      },
+      "expectedStatus": 400,
+      "expectedBody": {"error": "Заполните все обязательные поля"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
