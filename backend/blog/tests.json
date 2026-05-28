@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "GET blog posts list",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"total": 3},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

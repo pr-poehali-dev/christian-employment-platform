@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "GET without password returns 401",
+      "method": "GET",
+      "path": "/?section=stats",
+      "expectedStatus": 401,
+      "expectedBody": {"error": "Неверный пароль"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

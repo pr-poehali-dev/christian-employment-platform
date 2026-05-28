@@ -2,6 +2,8 @@ const URLS = {
   vacancies: "https://functions.poehali.dev/66f84417-5661-49b4-980c-54a231ac6829",
   resumes: "https://functions.poehali.dev/81651cdd-ce92-461e-b08a-1d350afa08ee",
   contacts: "https://functions.poehali.dev/729b3366-069b-4d08-9569-600a2cffe1ea",
+  blog: "https://functions.poehali.dev/62965943-5cae-4690-9ef4-31b6ed2e6113",
+  admin: "https://functions.poehali.dev/e7415f2f-33e6-4384-8af3-a7e71ccb6cb3",
 };
 
 export interface Vacancy {
@@ -104,4 +106,35 @@ export const api = {
     send: (data: { name: string; contact: string; message: string }): Promise<{ success: boolean }> =>
       request(URLS.contacts, { method: "POST", body: JSON.stringify(data) }),
   },
+
+  blog: {
+    list: (tag?: string): Promise<{ posts: BlogPost[]; total: number }> => {
+      const qs = tag ? `?tag=${encodeURIComponent(tag)}` : "";
+      return request(`${URLS.blog}${qs}`);
+    },
+    get: (slug: string): Promise<{ post: BlogPost }> =>
+      request(`${URLS.blog}?slug=${encodeURIComponent(slug)}`),
+  },
+
+  admin: {
+    request: <T>(section: string, method = "GET", body?: object, password = ""): Promise<T> =>
+      request(`${URLS.admin}?section=${section}`, {
+        method,
+        headers: { "Content-Type": "application/json", "X-Admin-Password": password },
+        body: body ? JSON.stringify(body) : undefined,
+      }),
+  },
 };
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  tag: string;
+  author: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at?: string;
+}

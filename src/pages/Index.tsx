@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { api, Vacancy, Resume } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
+import { api, Vacancy, Resume, BlogPost } from "@/lib/api";
 
 const HERO_IMG = "https://cdn.poehali.dev/projects/196c2a98-b24c-4dcb-b174-1f12b6760cec/files/a2976b3e-f63c-43e8-9715-55bfba4cc4f5.jpg";
 const ABOUT_IMG = "https://cdn.poehali.dev/projects/196c2a98-b24c-4dcb-b174-1f12b6760cec/files/b8ec5ba9-0a83-4558-97c4-2880b5a6a91f.jpg";
+const COMMUNITY_IMG = "https://cdn.poehali.dev/projects/196c2a98-b24c-4dcb-b174-1f12b6760cec/files/863e4c81-462a-48b9-a230-d4494a7df693.jpg";
 
 const NAV_LINKS = [
   { label: "Главная", id: "home" },
@@ -19,11 +21,7 @@ const NAV_LINKS = [
   { label: "Контакты", id: "contacts" },
 ];
 
-const BLOG_POSTS = [
-  { id: 1, date: "12 мая 2026", title: "Как найти призвание в работе?", excerpt: "О том, как христианские ценности помогают выстраивать профессиональный путь с внутренним миром.", tag: "Призвание" },
-  { id: 2, date: "5 мая 2026", title: "Честность на собеседовании", excerpt: "Почему честность — не слабость, а сила. Как говорить о себе правду и оставаться собой.", tag: "Советы" },
-  { id: 3, date: "28 апреля 2026", title: "Служение через профессию", excerpt: "Каждая профессия может стать служением. История нескольких наших соискателей.", tag: "Истории" },
-];
+
 
 const SPECS = ["Все специальности", "Образование", "Финансы", "Социальная сфера", "IT", "Психология", "Творчество"];
 const CITIES = ["Все города", "Москва", "Санкт-Петербург", "Екатеринбург", "Казань", "Новосибирск", "Удалённо"];
@@ -36,8 +34,10 @@ const SALARY_RANGES = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
 
   // Vacancies state
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
@@ -116,6 +116,7 @@ export default function Index() {
 
   useEffect(() => { loadVacancies(); }, [loadVacancies]);
   useEffect(() => { loadResumes(); }, [loadResumes]);
+  useEffect(() => { api.blog.list().then(d => setBlogPosts(d.posts.slice(0, 3))).catch(() => {}); }, []);
 
   const handleCreateVacancy = async () => {
     setFormLoading(true); setFormError(""); setFormSuccess("");
@@ -286,6 +287,28 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Photo strip — how it works */}
+      <section className="py-16 bg-background border-y border-border">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { img: HERO_IMG, title: "Находите работу", desc: "Вакансии от христианских организаций по всей России и удалённо" },
+              { img: COMMUNITY_IMG, title: "Встречайте людей", desc: "Сообщество единомышленников с общими ценностями и целями" },
+              { img: ABOUT_IMG, title: "Строите карьеру", desc: "Профессиональный рост в среде, где вера и работа неразделимы" },
+            ].map((item) => (
+              <div key={item.title} className="relative rounded-2xl overflow-hidden aspect-[3/2] group cursor-pointer">
+                <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <p className="font-display text-xl font-semibold text-white mb-1">{item.title}</p>
+                  <p className="text-white/75 text-sm leading-snug">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Vacancies */}
       <section id="vacancies" className="py-24 bg-background">
         <div className="container max-w-6xl mx-auto px-4">
@@ -352,7 +375,10 @@ export default function Index() {
             </div>
           )}
 
-          <div className="text-center mt-10">
+          <div className="text-center mt-10 flex gap-3 justify-center flex-wrap">
+            <Button onClick={() => navigate("/vacancies")} className="bg-warm-brown text-primary-foreground hover:bg-warm-brown/90 px-8">
+              Все вакансии <Icon name="ArrowRight" size={14} className="ml-1" />
+            </Button>
             <Button onClick={() => { setFormError(""); setFormSuccess(""); setVacModal(true); }} variant="outline" className="border-warm-brown text-warm-brown hover:bg-warm-brown hover:text-primary-foreground px-8">
               + Разместить вакансию
             </Button>
@@ -428,7 +454,10 @@ export default function Index() {
             </div>
           )}
 
-          <div className="text-center mt-10">
+          <div className="text-center mt-10 flex gap-3 justify-center flex-wrap">
+            <Button onClick={() => navigate("/resumes")} className="bg-warm-brown text-primary-foreground hover:bg-warm-brown/90 px-8">
+              Все резюме <Icon name="ArrowRight" size={14} className="ml-1" />
+            </Button>
             <Button onClick={() => { setFormError(""); setFormSuccess(""); setResModal(true); }} variant="outline" className="border-warm-brown text-warm-brown hover:bg-warm-brown hover:text-primary-foreground px-8">
               + Разместить резюме
             </Button>
@@ -439,28 +468,49 @@ export default function Index() {
       {/* Blog */}
       <section id="blog" className="py-24 bg-background">
         <div className="container max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <p className="text-sm text-sage mb-3 tracking-widest uppercase">Статьи</p>
-            <h2 className="font-display text-5xl font-light text-warm-brown">Наш блог</h2>
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-sm text-sage mb-3 tracking-widest uppercase">Статьи</p>
+              <h2 className="font-display text-5xl font-light text-warm-brown">Наш блог</h2>
+            </div>
+            <Button variant="outline" onClick={() => navigate("/blog")} className="hidden md:flex border-warm-brown text-warm-brown hover:bg-warm-brown hover:text-primary-foreground">
+              Все статьи <Icon name="ArrowRight" size={14} className="ml-1" />
+            </Button>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {BLOG_POSTS.map((post) => (
-              <article key={post.id} className="group cursor-pointer">
-                <div className="bg-cream rounded-xl aspect-video mb-4 flex items-center justify-center border border-border overflow-hidden relative group-hover:shadow-md transition-shadow">
-                  <div className="absolute inset-0 bg-gradient-to-br from-sage/20 to-gold/10" />
-                  <span className="font-display text-5xl text-warm-brown/20 relative z-10">✝</span>
-                </div>
-                <div className="flex items-center gap-3 mb-2">
-                  <Badge variant="outline" className="text-xs border-sage/40 text-sage">{post.tag}</Badge>
-                  <span className="text-xs text-muted-foreground">{post.date}</span>
-                </div>
-                <h3 className="font-display text-xl font-semibold mb-2 group-hover:text-warm-brown transition-colors leading-tight">{post.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{post.excerpt}</p>
-                <button className="mt-3 text-sm text-warm-brown font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                  Читать далее <Icon name="ArrowRight" size={14} />
-                </button>
-              </article>
-            ))}
+
+          {/* Photo feature + posts grid */}
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+              <img src={COMMUNITY_IMG} alt="Сообщество" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-warm-brown/70 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <p className="font-display text-2xl font-light text-primary-foreground leading-tight">
+                  «Где двое или трое собраны во имя Моё — там Я среди них»
+                </p>
+                <p className="text-primary-foreground/70 text-sm mt-2">Матфея 18:20</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-5 justify-between">
+              {(blogPosts.length > 0 ? blogPosts : []).slice(0, 3).map((post) => (
+                <article key={post.id} onClick={() => navigate(`/blog/${post.slug}`)} className="group cursor-pointer flex gap-4">
+                  <div className="w-16 h-16 rounded-xl bg-cream border border-border flex items-center justify-center flex-shrink-0 group-hover:shadow-sm transition-shadow">
+                    <span className="font-display text-2xl text-warm-brown/30">✝</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs border-sage/40 text-sage">{post.tag}</Badge>
+                    </div>
+                    <h3 className="font-display text-base font-semibold group-hover:text-warm-brown transition-colors leading-tight">{post.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{post.excerpt}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className="md:hidden text-center">
+            <Button variant="outline" onClick={() => navigate("/blog")} className="border-warm-brown text-warm-brown hover:bg-warm-brown hover:text-primary-foreground">
+              Все статьи <Icon name="ArrowRight" size={14} className="ml-1" />
+            </Button>
           </div>
         </div>
       </section>
