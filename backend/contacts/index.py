@@ -1,13 +1,17 @@
 """
 API: контактные сообщения + авторизация пользователей (register, login, me, update, logout).
+Email-уведомления через Gmail SMTP.
 """
 import json
 import os
 import hashlib
 import secrets
+import smtplib
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -17,6 +21,21 @@ CORS = {
 
 def get_conn():
     return psycopg2.connect(os.environ['DATABASE_URL'])
+
+def send_email(subject: str, html: str):
+    smtp_from = os.environ.get('SMTP_FROM', '')
+    smtp_pass = os.environ.get('SMTP_PASSWORD', '')
+    notify_to = os.environ.get('NOTIFY_EMAIL', '')
+    if not all([smtp_from, smtp_pass, notify_to]):
+        return
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = f'Благодать <{smtp_from}>'
+    msg['To'] = notify_to
+    msg.attach(MIMEText(html, 'html', 'utf-8'))
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as s:
+        s.login(smtp_from, smtp_pass)
+        s.sendmail(smtp_from, notify_to, msg.as_string())
 
 def hash_pw(pw: str) -> str:
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -139,6 +158,32 @@ def handler(event: dict, context) -> dict:
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO contact_messages (name, contact, message) VALUES (%s,%s,%s)", (name, contact, message))
             conn.commit()
+
+        # Email-уведомление
+        html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px">
+          <h2 style="color:#5c3d2e;border-bottom:2px solid #f0e6d3;padding-bottom:12px">
+            ✝ Новое сообщение с сайта
+          </h2>
+          <table style="width:100%;border-collapse:collapse">
+            <tr><td style="padding:8px 0;color:#888;width:120px">Имя</td>
+                <td style="padding:8px 0;font-weight:bold">{name}</td></tr>
+            <tr><td style="padding:8px 0;color:#888">Контакт</td>
+                <td style="padding:8px 0"><a href="mailto:{contact}" style="color:#5c3d2e">{contact}</a></td></tr>
+          </table>
+          <div style="margin-top:16px;background:#faf7f3;border-left:3px solid #c8956c;padding:12px 16px;color:#444;line-height:1.6">
+            {message}
+          </div>
+          <p style="margin-top:24px;color:#888;font-size:13px">
+            Сообщение сохранено в <a href="#" style="color:#5c3d2e">админ-панели</a>.
+          </p>
+        </div>
+        """
+        try:
+            send_email(f'Сообщение от {name}', html)
+        except Exception:
+            pass
+
         return ok({'success': True, 'message': 'Сообщение получено, мы свяжемся с вами'})
 
     return err('Неизвестный запрос', 404)
