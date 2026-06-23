@@ -14,16 +14,27 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "POST empty fields returns 400",
+      "name": "POST register user",
       "method": "POST",
-      "path": "/",
+      "path": "/?action=register",
       "body": {
-        "name": "",
-        "contact": "",
-        "message": ""
+        "email": "autotest_unique_xyz@test.ru",
+        "password": "test123",
+        "role": "seeker",
+        "first_name": "Авто",
+        "last_name": "Тест"
       },
+      "expectedStatus": 200,
+      "expectedBody": {"success": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST login wrong creds",
+      "method": "POST",
+      "path": "/?action=login",
+      "body": { "email": "nobody@nowhere.com", "password": "wrong" },
       "expectedStatus": 400,
-      "expectedBody": {"error": "Заполните все поля формы"},
+      "expectedBody": {"error": "Неверный email или пароль"},
       "bodyMatcher": "partial"
     }
   ]

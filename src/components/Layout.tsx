@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import { authStorage } from "@/lib/api";
 
 const NAV_LINKS = [
   { label: "Главная", path: "/" },
@@ -20,8 +21,15 @@ interface LayoutProps {
 
 export default function Layout({ children, onOpenVacancy, onOpenResume }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    setIsAuthed(authStorage.isAuthed());
+    setUserName(authStorage.getName());
+  }, [location]);
 
   const goTo = (path: string) => {
     setMobileOpen(false);
@@ -63,7 +71,7 @@ export default function Layout({ children, onOpenVacancy, onOpenResume }: Layout
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             {onOpenVacancy && (
               <Button variant="outline" size="sm" onClick={onOpenVacancy} className="border-warm-brown text-warm-brown hover:bg-warm-brown hover:text-primary-foreground">
                 Разместить вакансию
@@ -84,6 +92,25 @@ export default function Layout({ children, onOpenVacancy, onOpenResume }: Layout
                 </Button>
               </>
             )}
+            {/* Auth button */}
+            {isAuthed ? (
+              <button
+                onClick={() => goTo("/profile")}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:border-warm-brown/40 hover:bg-muted transition-colors ml-1"
+              >
+                <div className="w-6 h-6 rounded-full bg-warm-brown/15 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-warm-brown">{userName?.[0] || "У"}</span>
+                </div>
+                <span className="text-sm text-foreground max-w-[80px] truncate">{userName}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => goTo("/profile")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-warm-brown hover:bg-muted transition-colors ml-1"
+              >
+                <Icon name="LogIn" size={15} /> Войти
+              </button>
+            )}
           </div>
 
           <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -94,10 +121,13 @@ export default function Layout({ children, onOpenVacancy, onOpenResume }: Layout
         {mobileOpen && (
           <div className="md:hidden bg-background border-t border-border px-4 pb-4">
             {NAV_LINKS.map((link) => (
-              <button key={link.path} onClick={() => goTo(link.path)} className="block w-full text-left py-3 text-sm border-b border-border last:border-0 hover:text-warm-brown">
+              <button key={link.path} onClick={() => goTo(link.path)} className="block w-full text-left py-3 text-sm border-b border-border hover:text-warm-brown">
                 {link.label}
               </button>
             ))}
+            <button onClick={() => goTo("/profile")} className="block w-full text-left py-3 text-sm text-warm-brown font-medium">
+              {isAuthed ? `👤 ${userName}` : "Войти / Регистрация"}
+            </button>
           </div>
         )}
       </header>

@@ -309,6 +309,40 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Categories */}
+      <section className="py-16 bg-cream/40">
+        <div className="container max-w-6xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <p className="text-xs text-sage tracking-widest uppercase mb-2">Направления</p>
+            <h2 className="font-display text-4xl font-light text-warm-brown">Категории специальностей</h2>
+          </div>
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
+            {[
+              { icon: "GraduationCap", label: "Образование", color: "from-amber-50 to-amber-100/50", accent: "text-amber-700" },
+              { icon: "Banknote",      label: "Финансы",     color: "from-green-50 to-green-100/50", accent: "text-green-700" },
+              { icon: "Heart",         label: "Соц. сфера",  color: "from-rose-50 to-rose-100/50",   accent: "text-rose-600" },
+              { icon: "Monitor",       label: "IT",          color: "from-blue-50 to-blue-100/50",   accent: "text-blue-700" },
+              { icon: "Brain",         label: "Психология",  color: "from-purple-50 to-purple-100/50", accent: "text-purple-700" },
+              { icon: "Music",         label: "Творчество",  color: "from-pink-50 to-pink-100/50",   accent: "text-pink-700" },
+              { icon: "Building2",     label: "Администр.",  color: "from-slate-50 to-slate-100/50", accent: "text-slate-600" },
+              { icon: "Stethoscope",   label: "Медицина",    color: "from-teal-50 to-teal-100/50",   accent: "text-teal-700" },
+              { icon: "Scale",         label: "Юриспруд.",   color: "from-orange-50 to-orange-100/50", accent: "text-orange-700" },
+            ].map((cat) => (
+              <button
+                key={cat.label}
+                onClick={() => navigate("/vacancies")}
+                className={`flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br ${cat.color} border border-white hover:shadow-md hover:-translate-y-0.5 transition-all group`}
+              >
+                <div className={`w-10 h-10 rounded-xl bg-white/70 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow`}>
+                  <Icon name={cat.icon as "Home"} size={20} className={cat.accent} />
+                </div>
+                <span className="text-xs font-medium text-foreground/80 text-center leading-tight">{cat.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Vacancies */}
       <section id="vacancies" className="py-24 bg-background">
         <div className="container max-w-6xl mx-auto px-4">

@@ -4,7 +4,32 @@ const URLS = {
   contacts: "https://functions.poehali.dev/729b3366-069b-4d08-9569-600a2cffe1ea",
   blog: "https://functions.poehali.dev/62965943-5cae-4690-9ef4-31b6ed2e6113",
   admin: "https://functions.poehali.dev/e7415f2f-33e6-4384-8af3-a7e71ccb6cb3",
+  auth: "https://functions.poehali.dev/729b3366-069b-4d08-9569-600a2cffe1ea",
 };
+
+// Auth token helpers
+export const authStorage = {
+  getToken: () => localStorage.getItem("auth_token") || "",
+  setToken: (t: string) => localStorage.setItem("auth_token", t),
+  clear: () => { localStorage.removeItem("auth_token"); localStorage.removeItem("auth_role"); localStorage.removeItem("auth_name"); },
+  setUser: (role: string, name: string) => { localStorage.setItem("auth_role", role); localStorage.setItem("auth_name", name); },
+  getRole: () => localStorage.getItem("auth_role") || "",
+  getName: () => localStorage.getItem("auth_name") || "",
+  isAuthed: () => !!localStorage.getItem("auth_token"),
+};
+
+export interface User {
+  id: number;
+  email: string;
+  role: "employer" | "seeker";
+  first_name: string;
+  last_name: string;
+  organization?: string;
+  city?: string;
+  about?: string;
+  phone?: string;
+  created_at: string;
+}
 
 export interface Vacancy {
   id: number;
@@ -122,6 +147,32 @@ export const api = {
         method,
         headers: { "Content-Type": "application/json", "X-Admin-Password": password },
         body: body ? JSON.stringify(body) : undefined,
+      }),
+  },
+
+  auth: {
+    register: (data: object): Promise<{ success: boolean; token: string; role: string; first_name: string }> =>
+      request(`${URLS.auth}?action=register`, { method: "POST", body: JSON.stringify(data) }),
+
+    login: (email: string, password: string): Promise<{ success: boolean; token: string; role: string; first_name: string; last_name: string; id: number }> =>
+      request(`${URLS.auth}?action=login`, { method: "POST", body: JSON.stringify({ email, password }) }),
+
+    me: (): Promise<{ user: User }> =>
+      request(`${URLS.auth}?action=me`, {
+        headers: { "Content-Type": "application/json", "X-Session-Token": authStorage.getToken() },
+      }),
+
+    update: (data: Partial<User>): Promise<{ success: boolean }> =>
+      request(`${URLS.auth}?action=update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Session-Token": authStorage.getToken() },
+        body: JSON.stringify(data),
+      }),
+
+    logout: (): Promise<{ success: boolean }> =>
+      request(`${URLS.auth}?action=logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Session-Token": authStorage.getToken() },
       }),
   },
 };
