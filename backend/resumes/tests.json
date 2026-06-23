@@ -9,6 +9,14 @@
       "bodyMatcher": "partial"
     },
     {
+      "name": "GET mine without token returns 401",
+      "method": "GET",
+      "path": "/?action=mine",
+      "expectedStatus": 401,
+      "expectedBody": {"error": "Требуется авторизация"},
+      "bodyMatcher": "partial"
+    },
+    {
       "name": "POST create resume",
       "method": "POST",
       "path": "/",

@@ -124,7 +124,23 @@ export const api = {
     },
 
     create: (data: object): Promise<{ success: boolean; id: number }> =>
-      request(URLS.resumes, { method: "POST", body: JSON.stringify(data) }),
+      request(URLS.resumes, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Session-Token": authStorage.getToken() },
+        body: JSON.stringify(data),
+      }),
+
+    mine: (): Promise<{ resume: Resume | null }> =>
+      request(`${URLS.resumes}?action=mine`, {
+        headers: { "Content-Type": "application/json", "X-Session-Token": authStorage.getToken() },
+      }),
+
+    update: (data: Partial<Resume> & { id: number }): Promise<{ success: boolean }> =>
+      request(URLS.resumes, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Session-Token": authStorage.getToken() },
+        body: JSON.stringify(data),
+      }),
   },
 
   contacts: {
